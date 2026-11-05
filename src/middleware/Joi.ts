@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { IUser } from '../models/User';
 import { IActivity } from '../models/Activity';
 import { IReport } from '../models/Report';
+import { IReview } from '../models/Review';
 
 // Función que valida los datos del body.
 // stripUnknown: true elimina automáticamente campos de sistema (_id, createdAt, etc.) sin lanzar error 422.
@@ -195,40 +196,76 @@ export const Schemas = {
             targetType: Joi.string().valid('ACTIVITY', 'USER').required(),
             targetId: Joi.string().regex(OBJECT_ID).required(),
             reason: Joi.string().valid('SPAM', 'INAPPROPRIATE', 'NO_SHOW', 'FAKE_LOCATION', 'OTHER').required(),
-            description: Joi.string().min(5).max(1000).required(),
+            description: Joi.string().min(5).max(1000).required()
         }),
-    auth: {
-  register: Joi.object({
-    name: Joi.string().min(2).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-  }),
-  login: Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  }),
-},
+        auth: {
+            register: Joi.object({
+                name: Joi.string().min(2).required(),
+                email: Joi.string().email().required(),
+                password: Joi.string().min(6).required()
+            }),
+            login: Joi.object({
+                email: Joi.string().email().required(),
+                password: Joi.string().required()
+            })
+        },
 
-user: {
-    create: Joi.object({
-        name: Joi.string().min(2).required(),
-        email: Joi.string().email().required(),
-        password: Joi.string().min(6).required(),
-        role: Joi.string().valid('USER', 'ADMIN').default('USER'),
-    }),
-    update: Joi.object({
-        name: Joi.string().min(2),
-        email: Joi.string().email(),
-        password: Joi.string().min(6),
-        role: Joi.string().valid('USER', 'ADMIN'),
-    }).min(1),
-},
+        user: {
+            create: Joi.object({
+                name: Joi.string().min(2).required(),
+                email: Joi.string().email().required(),
+                password: Joi.string().min(6).required(),
+                role: Joi.string().valid('USER', 'ADMIN').default('USER')
+            }),
+            update: Joi.object({
+                name: Joi.string().min(2),
+                email: Joi.string().email(),
+                password: Joi.string().min(6),
+                role: Joi.string().valid('USER', 'ADMIN')
+            }).min(1)
+        },
 
         update: Joi.object<Partial<IReport>>({
             status: Joi.string().valid('PENDING', 'REVIEWED', 'RESOLVED', 'DISMISSED').optional(),
             adminNotes: Joi.string().max(500).allow('').optional(),
             reason: Joi.string().valid('SPAM', 'INAPPROPRIATE', 'NO_SHOW', 'FAKE_LOCATION', 'OTHER').optional(),
             description: Joi.string().min(5).max(1000).optional()
+        }).min(1)
+    },
+
+    // ------------------------------------------------------------------------
+    // REVIEWS
+    // ------------------------------------------------------------------------
+
+    review: {
+        create: Joi.object({
+            storeHostId: Joi.string().regex(OBJECT_ID).required(),
+            comment: Joi.string().min(5).max(1000).required(),
+            criteria: Joi.array()
+                .items(
+                    Joi.object({
+                        category: Joi.string().valid('CUSTOMER_SERVICE', 'CLEANLINESS', 'PRODUCT_QUALITY', 'LOCATION').required(),
+                        score: Joi.number().min(1).max(5).required(),
+                        comment: Joi.string().allow('').optional()
+                    })
+                )
+                .min(1)
+                .required(),
+            isVerified: Joi.boolean().optional()
+        }),
+        update: Joi.object({
+            comment: Joi.string().min(5).max(1000).optional(),
+            criteria: Joi.array()
+                .items(
+                    Joi.object({
+                        category: Joi.string().valid('CUSTOMER_SERVICE', 'CLEANLINESS', 'PRODUCT_QUALITY', 'LOCATION').required(),
+                        score: Joi.number().min(1).max(5).required(),
+                        comment: Joi.string().allow('').optional()
+                    })
+                )
+                .min(1)
+                .optional(),
+            isVerified: Joi.boolean().optional()
         }).min(1)
     }
 };

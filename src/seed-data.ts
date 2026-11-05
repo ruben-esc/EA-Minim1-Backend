@@ -1,6 +1,9 @@
 import { IUser } from './models/User';
 import { IActivity } from './models/Activity';
 import { IReport } from './models/Report';
+import { IReviewWithId } from './models/Review';
+
+import mongoose from 'mongoose';
 
 // Datos iniciales de las cuentas y sus permisos.
 // La contraseña de administrador se cifra antes de guardarse.
@@ -159,5 +162,42 @@ export const getSeedReports = (reporterId: string, activityId: string): Partial<
         description: 'Comportamiento inadecuado en el chat del grupo.',
         status: 'REVIEWED',
         adminNotes: 'En revisión por el equipo de soporte.'
+    }
+];
+
+// Mínimo 1: Valoraciones
+export const SEED_STORE_HOST_ID = '654321098765432109876550';
+export const SEED_USER_AUTHOR_ID = '654321098765432109876543';
+
+export const initialReviews: IReviewWithId[] = [
+    {
+        _id: new mongoose.Types.ObjectId('654321098765432109876601'),
+        storeHostId: new mongoose.Types.ObjectId(SEED_STORE_HOST_ID),
+        authorId: new mongoose.Types.ObjectId(SEED_USER_AUTHOR_ID),
+        comment: 'Excelente atención en la tienda física. Todo impecable y limpio.',
+        criteria: [
+            { category: 'CUSTOMER_SERVICE', score: 5, comment: 'Trato de diez por parte del personal.' },
+            { category: 'CLEANLINESS', score: 5, comment: 'La tienda estaba reluciente.' },
+            { category: 'PRODUCT_QUALITY', score: 4, comment: 'Buena variedad de juegos.' }
+        ],
+        overallScore: 4.7,
+        isVerified: true,
+        deleted: false,
+        deletedAt: null
+    },
+    {
+        _id: new mongoose.Types.ObjectId('654321098765432109876602'),
+        storeHostId: new mongoose.Types.ObjectId(SEED_STORE_HOST_ID),
+        authorId: new mongoose.Types.ObjectId(SEED_USER_AUTHOR_ID),
+        comment: 'Ubicación céntrica pero la atención al cliente puede mejorar.',
+        criteria: [
+            { category: 'CUSTOMER_SERVICE', score: 3, comment: 'Tardaron un poco en atendernos.' },
+            { category: 'LOCATION', score: 5, comment: 'Fácil acceso en transporte público.' },
+            { category: 'PRODUCT_QUALITY', score: 4, comment: 'Productos de alta calidad.' }
+        ],
+        overallScore: 4.0,
+        isVerified: false,
+        deleted: false,
+        deletedAt: null
     }
 ];
